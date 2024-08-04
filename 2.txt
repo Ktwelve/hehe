@@ -1,0 +1,35 @@
+import numpy as np
+import pandas as pd
+data=pd.read_csv('data.csv')
+concepts=np.array(data)[:,0:-1]
+print("instances are:\n",concepts)
+target=np.array(data)[:,-1]
+print("target values are:\n",target)
+def learn(concepts,target):
+    specific_h=concepts[0].copy()
+    print("initialization of specific_h and general_h:\n")
+    print(specific_h)
+    general_h=[['?' for i in range(len(specific_h))] for i in range(len(specific_h))]
+    print(general_h)
+    for i,h in enumerate(concepts):
+        if target[i]=='yes':
+            for x in range(len(specific_h)):
+                if h[x]!=specific_h[x]:
+                    specific_h[x]='?'
+                    general_h[x][x]='?'
+        if target[i]=='no':
+            for x in range(len(specific_h)):
+                if h[x]!=specific_h[x]:
+                    general_h[x][x]=specific_h[x]
+                else:
+                    general_h[x][x]='?'
+        print("steps",i+1,"of candidate elimination algorythm")
+        print(specific_h)
+        print(general_h)
+    indices=[i for i,val in enumerate(general_h) if val==['?','?','?','?','?','?']]
+    for i in indices:
+        general_h.remove(['?','?','?','?','?','?'])
+        return specific_h,general_h
+s_final,g_final=learn(concepts,target)
+print("final specific hypothesis:\n",s_final)
+print("final general hypothesis:\n",g_final)

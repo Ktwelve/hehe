@@ -1,0 +1,24 @@
+import sys
+from urllib.request import urlopen
+import numpy as np
+import pandas as pd
+heartDisease_df=pd.read_csv('heart.csv')
+heartDisease_df.drop(['ca','slope','thal','oldpeak'],axis=1,inplace=True)
+heartDisease_df.replace('?',np.nan,inplace=True)
+
+
+
+from pgmpy.estimators import MaximumLikelihoodEstimator
+from pgmpy.models import BayesianNetwork
+model=BayesianNetwork([('age','trestbps'),('age','fbs'),('sex','trestbps'),('exang','trestbps'),('trestbps','target'),('fbs','target'),('target','restecg'),('target','thalach'),('target','chol')])
+model.fit(heartDisease_df,estimator=MaximumLikelihoodEstimator)
+print(model.get_cpds('age'))
+print(model.get_cpds('chol'))
+print(model.get_cpds('sex'))
+model.get_independencies()
+from pgmpy.inference import VariableElimination
+HeartDisease_infer=VariableElimination(model)
+q=HeartDisease_infer.query(variables=['target'],evidence={'age':42},joint=False)
+print(q['target'])
+q=HeartDisease_infer.query(variables=['target'],evidence={'chol':318},joint=False)
+print(q['target'])
